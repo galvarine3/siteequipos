@@ -1,0 +1,318 @@
+<resources>
+    <string name="app_name">Equipos</string>
+    <string name="title_app_bar">Equipos</string>
+    <string name="action_language">Lenguaje</string>
+    <string name="es_short">ES</string>
+    <string name="en_short">EN</string>
+    <string name="es_label">Español</string>
+    <string name="en_label">Inglés</string>
+
+    <string name="info_title">Información</string>
+    <string name="info_text">✏️ Editar: Agrega, edita y borra (Click en Jugador) jugadores nuevos.\n⚖️ Generar: Crea 2 equipos equilibrados en el promedio de Puntaje.\n↩️ Deshacer: Borra los equipos conformados.\n🏆 Crear: Selecciona los jugadores/equipos a tu elección para un partido.\n🌐 Idioma: Cambiar a idioma Inglés.\n🕘 Historial: Visualiza, escribe resultado, asigna tarjetas y Capitán (Selecciona jugador y luego Ícono de tarjeta/Capitán).</string>
+    <string name="info_ok">Entendido</string>
+
+
+    <string name="select_players_and_count">Selecciona jugadores y cantidad</string>
+    <string name="enabled_count">Habilitados: %1$d</string>
+    <string name="edit">Editar</string>
+    <string name="players_count">Cantidad de jugadores: %1$d</string>
+    <string name="generate">Generar</string>
+    <string name="create">Crear</string>
+    <string name="undo">Deshacer</string>
+    <string name="players_tap_to_select">Jugadores (toca para desplegar)</string>
+
+    <string name="min_is_2">El mínimo es 2</string>
+    <string name="not_enough_selected">No hay suficientes jugadores seleccionados</string>
+
+    <string name="empty_state">Aún no hay equipos. Selecciona jugadores y crea equipos.</string>
+    <string name="team_a">Equipo A</string>
+    <string name="team_b">Equipo B</string>
+    <string name="average">Promedio: %1$s</string>
+
+    <string name="create_teams_title">Crear Partido</string>
+    <string name="assign_each_player">Asigna cada jugador a Equipo A, Equipo B, Ninguno o selecciona equipos.</string>
+    <string name="apply">Aplicar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="back">Volver</string>
+
+    <string name="edit_players_title">Editar jugadores</string>
+    <string name="edit_existing_ratings">Editar puntuaciones existentes:</string>
+    <string name="rating">Puntaje</string>
+    <string name="rating_placeholder">(1.0-10)</string>
+    <string name="add_new_player">Agregar nuevo jugador:</string>
+    <string name="name">Nombre</string>
+    <string name="goalkeeper">Arquero</string>
+    <string name="add">Agregar</string>
+    <string name="save_changes">Guardar cambios</string>
+    <string name="close">Cerrar</string>
+
+    <string name="edit_player_title">Editar jugador</string>
+    <string name="save">Guardar</string>
+    <string name="delete">Eliminar</string>
+    <string name="delete_player_title">Eliminar jugador</string>
+    <string name="delete_confirm">¿Seguro que deseas eliminar a "%1$s"?</string>
+    <string name="edit_team_name">Editar nombre del equipo</string>
+    <string name="team_name_label">Nombre del equipo</string>
+    <string name="history">Historial</string>
+    <string name="history_title">Historial de partidos</string>
+    <string name="no_history">No hay partidos guardados</string>
+    <string name="save_match">Guardar partido</string>
+    <string name="clear_history">Borrar historial</string>
+    <string name="clear_history_title">Borrar historial</string>
+    <string name="clear_history_confirm">¿Seguro que deseas borrar todo el historial de partidos?</string>
+    <string name="delete_match_title">Eliminar partido</string>
+    <string name="delete_match_confirm">¿Eliminar el partido "%1$s" vs "%2$s"?</string>
+    <string name="select_all">Seleccionar todos</string>
+    <string name="result_label">Resultado</string>
+    <string name="share">Compartir</string>
+    <string name="share_subject_current">Equipos generados</string>
+    <string name="share_subject_match">Partido: %1$s vs %2$s</string>
+    <string name="hide_results">Ocultar resultados</string>
+    <string name="show_results">Mostrar resultados</string>
+    <string name="formation">Formación</string>
+    <string name="select_formation">Elegir formación</string>
+    <string name="switch_team">Cambiar equipo</string>
+    
+    <!-- Localization additions -->
+    <string name="welcome_user">Bienvenido, %1$s</string>
+    <string name="active_session">Sesión activa</string>
+    <string name="versus_format">%1$s vs %2$s</string>
+    <string name="score_format">%1$d - %2$d</string>
+    
+    <string name="logout_confirm">¿Estás seguro que deseas cerrar sesión, %1$s?</string>
+    <string name="email_or_name">Email o nombre</string>
+    <string name="password_label">Contraseña</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="create_account">Crear cuenta</string>
+    <string name="register_title">Registrar</string>
+    <string name="password_min">Contraseña (mín %1$d)</string>
+    <string name="confirm_password">Confirmar contraseña</string>
+    
+    <string name="password_strength_weak">Contraseña débil</string>
+    <string name="password_strength_medium">Contraseña media</string>
+    <string name="password_strength_good">Contraseña buena</string>
+    <string name="password_strength_strong">Contraseña fuerte</string>
+    <string name="registering">Registrando...</string>
+    <string name="registration_done">Registro completado</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="logging_in">Iniciando…</string>
+    
+    <string name="attack">Ataque</string>
+    <string name="defense">Defensa</string>
+    <string name="physical">Físico</string>
+    <string name="have_account_login">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="formation_both">Formación (ambos)</string>
+
+    <!-- Errors -->
+    <string name="err_email_or_name_required">Ingresa tu email o nombre</string>
+    <string name="err_password_required">Ingresa tu contraseña</string>
+    <string name="err_server_response">Error en la respuesta del servidor</string>
+    <string name="err_invalid_credentials">Email o contraseña incorrectos</string>
+    <string name="err_invalid_data">Datos inválidos</string>
+    <string name="err_server_try_again">Error del servidor. Intenta nuevamente.</string>
+    <string name="err_login_generic">Error al iniciar sesión</string>
+    <string name="err_connection_with_detail">Error de conexión: %1$s</string>
+    <string name="err_name_required">Ingresa tu nombre</string>
+    <string name="err_email_invalid">Email inválido</string>
+    <string name="err_password_min">Mínimo %1$d caracteres</string>
+    <string name="err_passwords_mismatch">Las contraseñas no coinciden</string>
+    <string name="err_server_unavailable">Servidor no disponible. Intenta nuevamente.</string>
+    <string name="err_email_taken">Email ya registrado</string>
+    <string name="err_register_generic_with_detail">Error de registro%1$s</string>
+    
+    <!-- New localization helpers -->
+    <string name="email">Email</string>
+    <string name="bullet_player_name">• %1$s</string>
+    <string name="assignment_a">A</string>
+    <string name="assignment_b">B</string>
+    <string name="assignment_none">N</string>
+    <string name="community">Comunidad</string>
+    <string name="open_community">Comunidad</string>
+    <string name="nearby_users">Usuarios cercanos</string>
+    <string name="grant_location">Conceder ubicación</string>
+    <string name="location_denied">Permiso de ubicación denegado</string>
+    <string name="searching">Buscando…</string>
+    <string name="no_users_nearby">No hay usuarios cercanos</string>
+    <string name="distance_km">%1$.1f km</string>
+    <string name="create_match_offer">Crear oferta de partido</string>
+    <string name="create_vacancy">Publicar vacantes</string>
+
+    <!-- Comunidad: publicación de posts -->
+    <string name="community_title">Comunidad</string>
+    <string name="post_message_label">Mensaje</string>
+    <string name="sport_label">Deporte</string>
+    <string name="team_a_color_label">Color Equipo A</string>
+    <string name="team_b_color_label">Color Equipo B</string>
+    <string name="team_a_kit_label">Equipo A (Color/Nación)</string>
+    <string name="team_b_kit_label">Equipo B (Color/Nación)</string>
+    <string name="switch_to_nations">Naciones</string>
+    <string name="switch_to_colors">Colores</string>
+    <string name="clubs_menu">Clubes</string>
+    <string name="color_white">Blanco</string>
+    <string name="color_black">Negro</string>
+    <string name="color_blue">Azul</string>
+    <string name="color_red">Rojo</string>
+    <string name="color_yellow">Amarillo</string>
+    <string name="color_green">Verde</string>
+    <string name="color_purple">Morado</string>
+    <string name="nation_brazil">Brasil</string>
+    <string name="nation_argentina">Argentina</string>
+    <string name="nation_spain">España</string>
+    <string name="nation_france">Francia</string>
+    <string name="nation_germany">Alemania</string>
+    <string name="nation_italy">Italia</string>
+    <string name="nation_netherlands">Países Bajos</string>
+    <string name="nation_portugal">Portugal</string>
+    <string name="nation_england">Inglaterra</string>
+    <string name="nation_uruguay">Uruguay</string>
+    <string name="nation_belgium">Bélgica</string>
+    <string name="nation_united_states">Estados Unidos</string>
+    <string name="sport_soccer">Fútbol</string>
+    <string name="sport_futbolito">Futbolito</string>
+    <string name="sport_baby_soccer">Baby Fútbol</string>
+    <string name="sport_padel">Pádel</string>
+    <string name="sport_tennis">Tenis</string>
+    <string name="sport_volleyball">Voleybol</string>
+    <string name="sport_rugby">Rugby</string>
+    <string name="available_players">Disponibles</string>
+    <string name="total_players">Total</string>
+    <string name="locality_label">Localidad o comuna</string>
+    <string name="publish">Publicar</string>
+    <string name="posts_list_title">Publicaciones</string>
+    <string name="empty_posts">Aún no hay publicaciones</string>
+    <string name="post_published">Publicación creada</string>
+    <string name="post_published_remote">Publicación creada (servidor)</string>
+    <string name="post_published_local">Publicación guardada localmente</string>
+    <string name="err_post_required">Completa mensaje, disponibles, total y localidad</string>
+    <string name="post_format_title">%1$s: %2$s: %3$d/%4$d</string>
+    <string name="err_post_counts">Disponibles debe ser mayor a 0 y menor o igual que Total</string>
+    <string name="post_deleted">Publicación eliminada</string>
+    <string name="post_deleted_remote">Publicación eliminada (servidor)</string>
+    <string name="post_deleted_local">Publicación eliminada localmente</string>
+    <string name="post_updated">Publicación actualizada</string>
+    <string name="post_updated_remote">Publicación actualizada (servidor)</string>
+    <string name="post_updated_local">Publicación actualizada localmente</string>
+    <string name="chat">Chat</string>
+
+    <string name="welcome_generic">Bienvenido</string>
+    <string name="settings_title">Configuración</string>
+    <string name="dark_mode">Modo oscuro</string>
+
+    <string name="saved_teams_title">Equipos guardados</string>
+    <string name="tournament_mode_select_teams">Modo torneo: selecciona equipos</string>
+    <string name="league_mode_select_teams">Modo liga: selecciona equipos</string>
+    <string name="normal_mode">Modo normal</string>
+    <string name="teams_count_format">Equipos: %1$d</string>
+    <string name="saved_label">Guardados</string>
+    <string name="exit">Salir</string>
+    <string name="tournament">Torneo</string>
+    <string name="league">Liga</string>
+    <string name="available_teams">Equipos disponibles</string>
+    <string name="no_saved_teams">No hay equipos guardados</string>
+
+    <string name="tournament_generic">Torneo</string>
+    <string name="league_generic">Liga</string>
+    <string name="league_current">Liga actual</string>
+    <string name="tournament_default_name">Torneo de %1$d equipos</string>
+    <string name="league_default_name">Liga de %1$d equipos</string>
+
+    <string name="tournament_setup_title">Configuración de torneo</string>
+    <string name="league_setup_title">Configuración de liga</string>
+    <string name="bracket_label">Cuadro</string>
+    <string name="scoring_label">Puntajes</string>
+    <string name="win_label">Ganado</string>
+    <string name="draw_label">Empate</string>
+    <string name="loss_label">Perdido</string>
+    <string name="calendar_label">Calendario</string>
+    <string name="random_option">Al azar</string>
+    <string name="manual_option">A elección</string>
+    <string name="continue_action">Continuar</string>
+    <string name="manual_bracket_title">Cruces a elección</string>
+    <string name="manual_calendar_title">Calendario a elección</string>
+    <string name="no_phases_to_edit">No hay fases para editar</string>
+    <string name="phase_format">Fase %1$d</string>
+    <string name="bye">Descansa</string>
+    <string name="done">Listo</string>
+    <string name="vs">vs</string>
+
+    <string name="hide_calendar">Ocultar calendario</string>
+    <string name="show_calendar">Mostrar calendario</string>
+    <string name="hide_table">Ocultar tabla</string>
+    <string name="show_table">Mostrar tabla</string>
+    <string name="save_league">Guardar liga</string>
+    <string name="save_tournament">Guardar torneo</string>
+    <string name="league_name_title">Nombre de la liga</string>
+
+    <string name="match_calendar_title">Calendario de partidos</string>
+    <string name="matchday_format">Fecha %1$d</string>
+    <string name="no_result">Sin resultado</string>
+    <string name="result_with_value">Resultado: %1$s</string>
+    <string name="yellow_short">A</string>
+    <string name="red_short">R</string>
+    <string name="cards_format">%1$s: %2$d / %3$d · %4$s: %5$d / %6$d</string>
+
+    <string name="league_table_title">Tabla de posiciones</string>
+    <string name="rank_short">#</string>
+    <string name="team_label">Equipo</string>
+    <string name="points_short">Pts</string>
+    <string name="played_short">PJ</string>
+    <string name="goals_for_short">GF</string>
+    <string name="goals_against_short">GC</string>
+    <string name="goal_diff_short">DG</string>
+
+    <string name="tournament_history_title">Historial de torneos</string>
+    <string name="league_history_title">Historial de ligas</string>
+    <string name="no_saved_tournaments">No hay torneos guardados</string>
+    <string name="no_saved_leagues">No hay ligas guardadas</string>
+    <string name="teams_info_format">Equipos: %1$d</string>
+    <string name="champion_info_format">Campeón: %1$s</string>
+
+    <string name="tournament_name_title">Nombre del torneo</string>
+    <string name="tournament_tap_team_instruction">Toca un equipo en cada cruce para hacerlo avanzar a la siguiente ronda.</string>
+    <string name="teams_rounds_format">Equipos: %1$d · Rondas: %2$d</string>
+    <string name="round_final">Final</string>
+    <string name="round_semifinal">Semifinal</string>
+    <string name="round_of_16_or_quarters">Octavos / Cuartos</string>
+    <string name="round_format">Ronda %1$d</string>
+    <string name="champion_title">¡Campeón!</string>
+    <string name="players_count_parentheses">(%1$d jugadores)</string>
+
+    <string name="no_messages_yet">No hay mensajes aún</string>
+    <string name="select_two_teams_for_match">Selecciona 2 equipos para el partido</string>
+    <string name="create_match">Crear partido</string>
+    <string name="create_team">Crear equipo</string>
+    <string name="start_tournament">Iniciar torneo</string>
+    <string name="start_league">Iniciar liga</string>
+    <string name="vs_upper">VS</string>
+    <string name="send">Enviar</string>
+    <string name="team_name_label_full">Nombre del equipo</string>
+    <string name="players">Jugadores</string>
+    <string name="general_chat">Chat general</string>
+    <string name="view_large_pitch">Ver cancha grande</string>
+    <string name="delete_team_title">Eliminar equipo</string>
+    <string name="delete_team_confirm">¿Eliminar el equipo "%1$s"?</string>
+    <string name="type_message_hint">Escribe un mensaje...</string>
+    <string name="search_by_sport_and_commune">Buscar por deporte y comuna</string>
+    <string name="all">Todos</string>
+    <string name="delete_post_confirm">¿Seguro que quieres borrar este post?</string>
+    <string name="loading_conversations">Cargando conversaciones...</string>
+    <string name="no_messages_for_post">Sin mensajes para este post</string>
+    <string name="goals">Goles</string>
+    <string name="yellow_cards">Tarjetas amarillas</string>
+    <string name="red_cards">Tarjetas rojas</string>
+    <string name="remember_data">Recordar datos</string>
+    <string name="resend_verification">Reenviar verificación</string>
+    <string name="verification_email_resent">Correo de verificación reenviado</string>
+    <string name="teams">Equipos</string>
+    <string name="captain_short">C</string>
+    <string name="yellow_card_short">TA</string>
+    <string name="red_card_short">TR</string>
+
+    <!-- Google Sign-In -->
+    <string name="google_server_client_id">474138449000-2p3hkj29qds4mlm17ing2roqo2el0419.apps.googleusercontent.com</string>
+    <string name="continue_with_google">Continuar con Google</string>
+    <string name="err_google_signin_failed">No se pudo iniciar sesiÃ³n con Google</string>
+    <string name="err_google_missing_token">Google no devolviÃ³ un token vÃ¡lido</string>
+    <string name="err_google_not_configured">Login con Google no estÃƒÂ¡ configurado en el servidor</string>
+    <string name="err_google_client_id_missing">Falta configurar el Client ID de Google en la app</string>
+</resources>
