@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: equipos-webapp
+    runtime: static
+    rootDir: webapp
+    plan: free
+    autoDeploy: true
+    buildCommand: echo "No build step required"
+    staticPublishPath: public
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
