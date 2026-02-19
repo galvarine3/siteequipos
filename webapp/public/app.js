@@ -2,6 +2,107 @@ const app = document.getElementById('app');
 
 const PREFS_KEY = 'equipos_web_players_v1';
 const MATCHES_KEY = 'equipos_web_matches_v1';
+const AUTH_KEY = 'equipos_web_auth_v1';
+const API_BASE_KEY = 'equipos_api_base_v1';
+
+let authState = loadAuthState();
+let APP_STATE = null;
+let GLOBAL_EVENTS_BOUND = false;
+let playersSyncTimer = null;
+
+function normalizeApiBase(value){
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+  return trimmed.replace(/\/+$/, '');
+}
+
+function getApiBase(){
+  return normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+}
+
+function setApiBase(url){
+  const normalized = normalizeApiBase(url);
+  if (!normalized) {
+    localStorage.removeItem(API_BASE_KEY);
+  } else {
+    localStorage.setItem(API_BASE_KEY, normalized);
+  }
+  return normalized;
+}
+
+function loadAuthState(){
+  try {
+    const raw = localStorage.getItem(AUTH_KEY);
+    if (!raw) return { accessToken: null, refreshToken: null, user: null };
+    const data = JSON.parse(raw);
+    return {
+      accessToken: data?.accessToken || null,
+      refreshToken: data?.refreshToken || null,
+      user: data?.user || null
+    };
+  } catch {
+    return { accessToken: null, refreshToken: null, user: null };
+  }
+}
+
+function saveAuthState(state){
+  authState = {
+    accessToken: state?.accessToken || null,
+    refreshToken: state?.refreshToken || null,
+    user: state?.user || null
+  };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(authState));
+  updateAuthActionUI();
+}
+
+function clearAuthState(){
+  authState = { accessToken: null, refreshToken: null, user: null };
+  localStorage.removeItem(AUTH_KEY);
+  updateAuthActionUI();
+}
+
+function isAuthenticated(){
+  return !!authState?.accessToken;
+}
+
+function updateAuthActionUI(){
+  const btn = document.getElementById('action-auth');
+  if (!btn) return;
+  if (isAuthenticated()) {
+    const label = authState?.user?.name || authState?.user?.email || 'Cuenta';
+    btn.textContent = '👤';
+    btn.title = `Cuenta: ${label}`;
+  } else {
+    btn.textContent = '🔐';
+    btn.title = 'Iniciar sesión';
+  }
+}
+
+function normalizePlayer(p){
+  const physical = (typeof p?.physical === 'number')
+    ? p.physical
+    : (typeof p?.skill === 'number' ? p.skill : 0);
+  return {
+    name: String(p?.name || '').trim(),
+    attack: Number(p?.attack || 0),
+    defense: Number(p?.defense || 0),
+    physical: Number(physical || 0),
+    isGoalkeeper: !!p?.isGoalkeeper
+  };
+}
+
+function normalizeMatch(m){
+  const timeNum = Number(m?.time || Date.now());
+  return {
+    id: String(m?.id ?? Date.now()),
+    time: Number.isFinite(timeNum) ? timeNum : Date.now(),
+    titleA: String(m?.titleA || ''),
+    titleB: String(m?.titleB || ''),
+    teamA: Array.isArray(m?.teamA) ? m.teamA : [],
+    teamB: Array.isArray(m?.teamB) ? m.teamB : [],
+    result: String(m?.result || '')
+  };
+}
 
 const initialPlayers = [
   { name: 'Rulo', attack: 5.0, defense: 8.0, physical: 8.0, isGoalkeeper: true },
@@ -73,6 +174,154 @@ async function openInfoModal(){
   btn?.addEventListener('click', doClose, { once: true });
   btn?.addEventListener('touchend', (e)=>{ try { e.preventDefault(); } catch {} doClose(); }, { passive: false, once: true });
 }
+
+function openAuthModal(){
+  const t = i18n();
+  document.getElementById('auth-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'auth-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.background = 'rgba(0,0,0,0.5)';
+  overlay.style.display = 'grid';
+  overlay.style.placeItems = 'center';
+
+  const userLabel = authState?.user?.name || authState?.user?.email || 'Cuenta conectada';
+  const logged = isAuthenticated();
+  const savedBase = getApiBase();
+
+  overlay.innerHTML = `
+    <div class="card" style="max-width:560px; width:92vw; max-height:84vh; overflow:auto">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">Cuenta</h3>
+        <button id="auth-close">${t.close}</button>
+      </div>
+
+      <div style="margin-top:10px">
+        <label for="api-base" style="display:block; margin-bottom:6px">URL Backend API</label>
+        <input id="api-base" type="text" placeholder="https://tu-backend.onrender.com" value="${savedBase}" style="width:100%" />
+        <div class="row" style="margin-top:8px">
+          <button id="save-base">Guardar URL API</button>
+          <small style="opacity:0.8">Requerido para login/sync</small>
+        </div>
+      </div>
+
+      ${logged ? `
+        <div style="margin-top:14px">
+          <p style="margin:0 0 8px"><strong>${userLabel}</strong></p>
+          <div class="row">
+            <button id="sync-now">Sincronizar ahora</button>
+            <button id="logout" class="danger">Cerrar sesion</button>
+          </div>
+        </div>
+      ` : `
+        <div style="margin-top:14px">
+          <div style="margin-top:8px">
+            <input id="auth-name" type="text" placeholder="Nombre (solo registro)" style="width:100%" />
+          </div>
+          <div style="margin-top:8px">
+            <input id="auth-email" type="text" placeholder="Email" style="width:100%" />
+          </div>
+          <div style="margin-top:8px">
+            <input id="auth-password" type="password" placeholder="Password" style="width:100%" />
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button id="login-btn">Iniciar sesion</button>
+            <button id="register-btn">Registrarse</button>
+            <button id="resend-btn">Reenviar verificacion</button>
+          </div>
+          <small style="display:block; margin-top:8px; opacity:0.8">Si te registras, debes verificar email antes del login.</small>
+        </div>
+      `}
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  const close = ()=>{ try { document.body.removeChild(overlay); } catch {} };
+  overlay.addEventListener('click', (e)=>{ if (e.target===overlay) close(); }, { once: true });
+  overlay.querySelector('#auth-close')?.addEventListener('click', close, { once: true });
+  overlay.querySelector('#auth-close')?.addEventListener('touchend', (e)=>{ try { e.preventDefault(); } catch {} close(); }, { passive: false, once: true });
+
+  const readBase = ()=>{
+    const value = overlay.querySelector('#api-base')?.value || '';
+    const normalized = setApiBase(value);
+    updateAuthActionUI();
+    return normalized;
+  };
+
+  overlay.querySelector('#save-base')?.addEventListener('click', ()=>{
+    const base = readBase();
+    alert(base ? `API guardada: ${base}` : 'URL API eliminada');
+  });
+
+  overlay.querySelector('#sync-now')?.addEventListener('click', async ()=>{
+    const base = readBase();
+    if (!base) { alert('Configura primero la URL del backend API'); return; }
+    if (!APP_STATE) return;
+    await hydrateFromServer(APP_STATE);
+    alert('Sincronizacion completada');
+  });
+
+  overlay.querySelector('#logout')?.addEventListener('click', ()=>{
+    clearAuthState();
+    close();
+    if (APP_STATE) render(APP_STATE);
+  });
+
+  overlay.querySelector('#login-btn')?.addEventListener('click', async ()=>{
+    const base = readBase();
+    if (!base) { alert('Configura primero la URL del backend API'); return; }
+    const email = String(overlay.querySelector('#auth-email')?.value || '').trim();
+    const password = String(overlay.querySelector('#auth-password')?.value || '');
+    if (!email || !password) { alert('Email y password son obligatorios'); return; }
+    try {
+      const data = await apiRequest('/auth/login', { method: 'POST', body: { email, password } });
+      if (!data?.accessToken) throw new Error('login_failed');
+      saveAuthState({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        user: data.user || { email }
+      });
+      if (APP_STATE) await hydrateFromServer(APP_STATE);
+      close();
+    } catch (err) {
+      const msg = String(err?.message || 'error');
+      if (msg.includes('email_not_verified')) alert('Debes verificar tu email antes de iniciar sesion');
+      else alert(`Login fallido: ${msg}`);
+    }
+  });
+
+  overlay.querySelector('#register-btn')?.addEventListener('click', async ()=>{
+    const base = readBase();
+    if (!base) { alert('Configura primero la URL del backend API'); return; }
+    const name = String(overlay.querySelector('#auth-name')?.value || '').trim();
+    const email = String(overlay.querySelector('#auth-email')?.value || '').trim();
+    const password = String(overlay.querySelector('#auth-password')?.value || '');
+    if (!name || !email || password.length < 6) {
+      alert('Nombre, email y password (min 6) son obligatorios');
+      return;
+    }
+    try {
+      await apiRequest('/auth/register', { method: 'POST', body: { name, email, password } });
+      alert('Registro exitoso. Revisa tu email para verificar la cuenta.');
+    } catch (err) {
+      alert(`Registro fallido: ${String(err?.message || 'error')}`);
+    }
+  });
+
+  overlay.querySelector('#resend-btn')?.addEventListener('click', async ()=>{
+    const base = readBase();
+    if (!base) { alert('Configura primero la URL del backend API'); return; }
+    const email = String(overlay.querySelector('#auth-email')?.value || '').trim();
+    if (!email) { alert('Ingresa tu email'); return; }
+    try {
+      await apiRequest('/auth/send-verification', { method: 'POST', body: { email } });
+      alert('Si la cuenta existe, se envio un nuevo email de verificacion');
+    } catch (err) {
+      alert(`No se pudo reenviar: ${String(err?.message || 'error')}`);
+    }
+  });
+}
 const weights = { attack: 0.35, defense: 0.35, physical: 0.30 };
 function rating(p){ return p.attack*weights.attack + p.defense*weights.defense + p.physical*weights.physical; }
 
@@ -82,21 +331,16 @@ function loadPlayers(){
     const fallback = initialPlayers.slice();
     const arr = raw ? JSON.parse(raw) : fallback;
     const list = Array.isArray(arr) ? arr : fallback;
-    // compatibility: map legacy 'skill' to new 'physical'
-    return list.map(p=>{
-      const physical = (typeof p.physical === 'number')
-        ? p.physical
-        : (typeof p.skill === 'number' ? p.skill : 0);
-      return { ...p, physical };
-    });
+    return list.map(normalizePlayer).filter(p => p.name);
   } catch {
-    // fallback with compatibility mapping
-    return initialPlayers.slice().map(p=>({ ...p, physical: (typeof p.physical==='number'?p.physical:(typeof p.skill==='number'?p.skill:0)) }));
+    return initialPlayers.slice().map(normalizePlayer).filter(p => p.name);
   }
 }
 
-function savePlayers(players){
-  localStorage.setItem(PREFS_KEY, JSON.stringify(players));
+function savePlayers(players, opts = {}){
+  const normalized = (players || []).map(normalizePlayer).filter(p => p.name);
+  localStorage.setItem(PREFS_KEY, JSON.stringify(normalized));
+  if (!opts.skipRemote && isAuthenticated()) queuePlayersSync(normalized);
 }
 
 function loadMatches(){
@@ -104,33 +348,198 @@ function loadMatches(){
     const raw = localStorage.getItem(MATCHES_KEY);
     if (!raw) return [];
     const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
+    return Array.isArray(arr) ? arr.map(normalizeMatch) : [];
   } catch { return []; }
 }
 
 function saveMatches(list){
-  localStorage.setItem(MATCHES_KEY, JSON.stringify(list));
+  const normalized = (list || []).map(normalizeMatch);
+  localStorage.setItem(MATCHES_KEY, JSON.stringify(normalized));
 }
 
 function addMatch(titleA, titleB, teamA, teamB){
   const current = loadMatches();
   const now = Date.now();
-  const m = { id: now, time: now, titleA, titleB, teamA, teamB, result: '' };
+  const tempId = `local-${now}`;
+  const m = { id: tempId, time: now, titleA, titleB, teamA, teamB, result: '' };
   current.unshift(m);
   saveMatches(current);
+  if (isAuthenticated()) {
+    (async ()=>{
+      try {
+        const created = await apiRequest('/matches', {
+          method: 'POST',
+          auth: true,
+          body: { time: now, titleA, titleB, teamA, teamB, result: '' }
+        });
+        if (!created?.id) return;
+        const updated = loadMatches().map(item => item.id === tempId ? normalizeMatch(created) : item);
+        saveMatches(updated);
+      } catch (err) {
+        console.error('addMatch sync error', err);
+      }
+    })();
+  }
 }
 
 function deleteMatch(id){
+  const idStr = String(id);
   const current = loadMatches();
-  const updated = current.filter(m=>m.id!==id);
+  const updated = current.filter(m=>String(m.id)!==idStr);
   saveMatches(updated);
+  if (isAuthenticated() && !idStr.startsWith('local-')) {
+    apiRequest(`/matches/${encodeURIComponent(idStr)}`, { method: 'DELETE', auth: true }).catch(err => {
+      console.error('deleteMatch sync error', err);
+    });
+  }
 }
 
-function clearAllMatches(){ saveMatches([]); }
+function clearAllMatches(){
+  const current = loadMatches();
+  saveMatches([]);
+  if (isAuthenticated()) {
+    current.forEach(m => {
+      const id = String(m.id || '');
+      if (!id || id.startsWith('local-')) return;
+      apiRequest(`/matches/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }).catch(() => {});
+    });
+  }
+}
 
 function updateMatchResult(id, result){
-  const updated = loadMatches().map(m=> m.id===id ? ({...m, result}) : m);
+  const idStr = String(id);
+  const updated = loadMatches().map(m=> String(m.id)===idStr ? ({...m, result}) : m);
   saveMatches(updated);
+  if (isAuthenticated() && !idStr.startsWith('local-')) {
+    apiRequest(`/matches/${encodeURIComponent(idStr)}`, {
+      method: 'PUT',
+      auth: true,
+      body: { result }
+    }).catch(err => {
+      console.error('updateMatchResult sync error', err);
+    });
+  }
+}
+
+function queuePlayersSync(players){
+  clearTimeout(playersSyncTimer);
+  playersSyncTimer = setTimeout(() => {
+    syncPlayersToServer(players).catch(err => console.error('players bulk sync error', err));
+  }, 400);
+}
+
+async function refreshAccessToken(){
+  if (!authState?.refreshToken) return false;
+  const base = getApiBase();
+  if (!base) return false;
+  try {
+    const res = await fetch(`${base}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: authState.refreshToken })
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data?.accessToken) return false;
+    saveAuthState({ ...authState, accessToken: data.accessToken, refreshToken: data.refreshToken || authState.refreshToken });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function apiRequest(path, options = {}){
+  const {
+    method = 'GET',
+    body = undefined,
+    auth = false,
+    retry = true
+  } = options;
+
+  const base = getApiBase();
+  if (!base) throw new Error('api_base_not_configured');
+  const endpoint = `${base}${path}`;
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (auth && authState?.accessToken) {
+    headers.Authorization = `Bearer ${authState.accessToken}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+
+  if (response.status === 401 && auth && retry) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      return apiRequest(path, { ...options, retry: false });
+    }
+    clearAuthState();
+    throw new Error('unauthorized');
+  }
+
+  const text = await response.text();
+  let payload = null;
+  try { payload = text ? JSON.parse(text) : null; } catch { payload = text; }
+
+  if (!response.ok) {
+    const msg = (payload && typeof payload === 'object' && payload.error) ? payload.error : `${response.status}`;
+    throw new Error(String(msg));
+  }
+  return payload;
+}
+
+async function syncPlayersToServer(players){
+  if (!isAuthenticated()) return;
+  const list = await apiRequest('/players/bulk', {
+    method: 'POST',
+    auth: true,
+    body: { players: players.map(normalizePlayer) }
+  });
+  if (!Array.isArray(list)) return;
+  const normalized = list.map(normalizePlayer).filter(p => p.name);
+  savePlayers(normalized, { skipRemote: true });
+  if (APP_STATE) {
+    APP_STATE.players = normalized;
+    APP_STATE.selected = new Set(normalized.map(p => p.name));
+    APP_STATE.count = Math.min(Math.max(APP_STATE.count, 2), Math.max(2, normalized.length));
+    render(APP_STATE);
+  }
+}
+
+async function hydrateFromServer(state){
+  if (!isAuthenticated()) return;
+  if (!getApiBase()) return;
+  try {
+    const [remotePlayers, remoteMatches] = await Promise.all([
+      apiRequest('/players', { auth: true }),
+      apiRequest('/matches', { auth: true })
+    ]);
+
+    if (Array.isArray(remotePlayers) && remotePlayers.length > 0) {
+      const players = remotePlayers.map(normalizePlayer).filter(p => p.name);
+      savePlayers(players, { skipRemote: true });
+      state.players = players;
+      state.selected = new Set(players.map(p => p.name));
+      state.count = Math.min(Math.max(state.count, 2), Math.max(2, players.length));
+    } else if (Array.isArray(remotePlayers) && remotePlayers.length === 0) {
+      const localPlayers = loadPlayers();
+      if (localPlayers.length) {
+        await syncPlayersToServer(localPlayers);
+      }
+    }
+
+    if (Array.isArray(remoteMatches)) {
+      const matches = remoteMatches.map(normalizeMatch).sort((a, b) => b.time - a.time);
+      saveMatches(matches);
+    }
+
+    render(state);
+  } catch (err) {
+    console.error('hydrateFromServer error', err);
+  }
 }
 
 function formatTeamBlock(title, team){
@@ -268,7 +677,9 @@ function i18n(){
     close: 'Close',
     clearHistory: 'Clear history',
     delete: 'Delete',
-    result: 'Result'
+    result: 'Result',
+    syncOnline: 'Cloud sync enabled',
+    syncOffline: 'Local mode only'
   };
   const es = {
     selectPlayersAndCount: 'Selecciona jugadores y cantidad',
@@ -292,7 +703,9 @@ function i18n(){
     close: 'Cerrar',
     clearHistory: 'Limpiar historial',
     delete: 'Eliminar',
-    result: 'Resultado'
+    result: 'Resultado',
+    syncOnline: 'Sincronizacion en la nube activa',
+    syncOffline: 'Solo modo local'
   };
   // add labels for scoring fields
   en.attack = 'Attack'; en.defense = 'Defense'; en.physical = 'Physical';
@@ -316,6 +729,9 @@ function render(appState){
       <div class="row" style="justify-content:space-between">
         <span>${t.enabledCount(selectedPlayers.length)}</span>
         
+      </div>
+      <div style="margin-top:4px">
+        <small style="opacity:0.8">${isAuthenticated() ? t.syncOnline : t.syncOffline}</small>
       </div>
       <div class="row" style="margin-top:6px">
         <input type="checkbox" id="chk-all" ${allSelected?'checked':''} />
@@ -526,7 +942,9 @@ function init(){
     showResults: true,
     lastSig: ''
   };
+  APP_STATE = state;
   render(state);
+  updateAuthActionUI();
 
   const infoBtn = document.getElementById('action-info');
   infoBtn?.addEventListener('click', ()=> openInfoModal());
@@ -534,71 +952,80 @@ function init(){
   const historyBtn = document.getElementById('action-history');
   historyBtn?.addEventListener('click', ()=> openHistoryModal());
 
+  const authBtn = document.getElementById('action-auth');
+  authBtn?.addEventListener('click', ()=> openAuthModal());
+
   const langBtn = document.getElementById('action-language');
   langBtn?.addEventListener('click', ()=>{
     window.__lang = window.__lang === 'en' ? 'es' : 'en';
     render(state);
   });
 
-  let lastUpTime = -1, lastDownTime = -1;
-  let lastVolUp = -1, lastVolDown = -1;
-  window.addEventListener('keydown', (e)=>{
-    const now = Date.now();
-    const key = e.key || e.code;
-    if (key === 'ArrowUp'){
-      lastUpTime = now;
-      if (lastDownTime > 0 && (now - lastDownTime) <= 300) {
-        openEditPlayersDialog();
-      }
-    } else if (key === 'ArrowDown'){
-      lastDownTime = now;
-      if (lastUpTime > 0 && (now - lastUpTime) <= 300) {
-        openEditPlayersDialog();
-      }
-    } else if (key === 'AudioVolumeUp' || key === 'VolumeUp'){
-      lastVolUp = now;
-      if (lastVolDown > 0 && (now - lastVolDown) <= 400) {
-        try { e.preventDefault(); } catch {}
-        openEditPlayersDialog();
-      }
-    } else if (key === 'AudioVolumeDown' || key === 'VolumeDown'){
-      lastVolDown = now;
-      if (lastVolUp > 0 && (now - lastVolUp) <= 400) {
-        try { e.preventDefault(); } catch {}
-        openEditPlayersDialog();
-      }
-    }
-  }, { passive: false });
-
-  // triple tap on non-interactive empty areas to open Edit dialog
-  let tapTimes = [];
-  let lastTapPos = null;
-  const isInteractive = (el)=> !!el.closest('button, input, select, textarea, label, a, [role="button"], [data-touch-exclude]');
-  window.addEventListener('touchend', (e)=>{
-    try {
-      if (!e || !e.target || isInteractive(e.target)) return;
-      const t = e.changedTouches && e.changedTouches[0];
-      if (!t) return;
+  if (!GLOBAL_EVENTS_BOUND) {
+    GLOBAL_EVENTS_BOUND = true;
+    let lastUpTime = -1, lastDownTime = -1;
+    let lastVolUp = -1, lastVolDown = -1;
+    window.addEventListener('keydown', (e)=>{
       const now = Date.now();
-      const pos = { x: t.clientX, y: t.clientY };
-      // keep taps within the last 600ms
-      tapTimes = tapTimes.filter(ts=> now - ts <= 600);
-      if (lastTapPos){
-        const dx = pos.x - lastTapPos.x, dy = pos.y - lastTapPos.y;
-        const dist2 = dx*dx + dy*dy;
-        if (dist2 > 1600) { // >40px radius resets
-          tapTimes = [];
+      const key = e.key || e.code;
+      if (key === 'ArrowUp'){
+        lastUpTime = now;
+        if (lastDownTime > 0 && (now - lastDownTime) <= 300) {
+          openEditPlayersDialog();
+        }
+      } else if (key === 'ArrowDown'){
+        lastDownTime = now;
+        if (lastUpTime > 0 && (now - lastUpTime) <= 300) {
+          openEditPlayersDialog();
+        }
+      } else if (key === 'AudioVolumeUp' || key === 'VolumeUp'){
+        lastVolUp = now;
+        if (lastVolDown > 0 && (now - lastVolDown) <= 400) {
+          try { e.preventDefault(); } catch {}
+          openEditPlayersDialog();
+        }
+      } else if (key === 'AudioVolumeDown' || key === 'VolumeDown'){
+        lastVolDown = now;
+        if (lastVolUp > 0 && (now - lastVolUp) <= 400) {
+          try { e.preventDefault(); } catch {}
+          openEditPlayersDialog();
         }
       }
-      tapTimes.push(now);
-      lastTapPos = pos;
-      if (tapTimes.length >= 3){
-        tapTimes = [];
-        lastTapPos = null;
-        openEditPlayersDialog();
-      }
-    } catch {}
-  }, { passive: true });
+    }, { passive: false });
+
+    // triple tap on non-interactive empty areas to open Edit dialog
+    let tapTimes = [];
+    let lastTapPos = null;
+    const isInteractive = (el)=> !!el.closest('button, input, select, textarea, label, a, [role="button"], [data-touch-exclude]');
+    window.addEventListener('touchend', (e)=>{
+      try {
+        if (!e || !e.target || isInteractive(e.target)) return;
+        const t = e.changedTouches && e.changedTouches[0];
+        if (!t) return;
+        const now = Date.now();
+        const pos = { x: t.clientX, y: t.clientY };
+        tapTimes = tapTimes.filter(ts=> now - ts <= 600);
+        if (lastTapPos){
+          const dx = pos.x - lastTapPos.x, dy = pos.y - lastTapPos.y;
+          const dist2 = dx*dx + dy*dy;
+          if (dist2 > 1600) {
+            tapTimes = [];
+          }
+        }
+        tapTimes.push(now);
+        lastTapPos = pos;
+        if (tapTimes.length >= 3){
+          tapTimes = [];
+          lastTapPos = null;
+          openEditPlayersDialog();
+        }
+      } catch {}
+    }, { passive: true });
+  }
+
+  if (isAuthenticated()) {
+    hydrateFromServer(state);
+  }
 }
 
 init();
@@ -655,7 +1082,7 @@ function openHistoryModal(){
   overlay.querySelector('#btn-clear')?.addEventListener('click', ()=>{ if (confirm('¿Limpiar historial?')){ clearAllMatches(); doClose(); openHistoryModal(); }});
   overlay.querySelectorAll('button[data-action]')?.forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const id = Number(btn.getAttribute('data-id'));
+      const id = String(btn.getAttribute('data-id') || '');
       const action = btn.getAttribute('data-action');
       if (action==='delete'){
         if (confirm('¿Eliminar partido?')){ deleteMatch(id); doClose(); openHistoryModal(); }
